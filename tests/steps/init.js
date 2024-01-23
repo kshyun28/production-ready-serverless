@@ -1,6 +1,8 @@
 const { promisify } = require('util')
 const awscred = require('awscred')
-require('dotenv').config()
+const dotenv = require('dotenv')
+dotenv.config({ path: './.env.local' })
+dotenv.config()
 
 let initialized = false
 
