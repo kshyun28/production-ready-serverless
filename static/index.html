@@ -23,7 +23,7 @@
         bottom: 0px;
         top: 0px;
         left: 0;
-        position: absolute;
+        position: absolute;        
       }
       .restaurantsDiv {
         background-color: #ffffff;
@@ -40,7 +40,7 @@
       }
       .column-container {
         padding: 0;
-        margin: 0;
+        margin: 0;        
         list-style: none;
         display: flex;
         flex-flow: column;
@@ -113,11 +113,11 @@
         font-family: Arial, Helvetica, sans-serif;
         font-size: 18px;
       }
-
-      fieldset {
-        padding:0;
-        border:0;
-        margin-top:25px;
+      
+      fieldset { 
+        padding:0; 
+        border:0; 
+        margin-top:25px; 
       }
 
     </style>
@@ -127,6 +127,7 @@
       const COGNITO_USER_POOL_ID = '{{cognitoUserPoolId}}';
       const CLIENT_ID = '{{cognitoClientId}}';
       const SEARCH_URL = '{{& searchUrl}}';
+      const PLACE_ORDER_URL = '{{& placeOrderUrl}}';
 
       var regDialog, regForm;
       var verifyDialog;
@@ -151,14 +152,14 @@
         AWS.config.region = AWS_REGION;
         AWSCognito.config.region = AWS_REGION;
 
-        var data = {
-          UserPoolId : COGNITO_USER_POOL_ID,
+        var data = { 
+          UserPoolId : COGNITO_USER_POOL_ID, 
           ClientId : CLIENT_ID
         };
         userPool = new AWSCognito.CognitoIdentityServiceProvider.CognitoUserPool(data);
         cognitoUser = userPool.getCurrentUser();
 
-        if (cognitoUser != null) {
+        if (cognitoUser != null) {          
           cognitoUser.getSession(function(err, session) {
             if (err) {
                 alert(err);
@@ -188,13 +189,13 @@
         var email = $("#email")[0].value;
 
         var attributeList = [
-          new AWSCognito.CognitoIdentityServiceProvider.CognitoUserAttribute({
+          new AWSCognito.CognitoIdentityServiceProvider.CognitoUserAttribute({ 
             Name : 'email', Value : email
           }),
-          new AWSCognito.CognitoIdentityServiceProvider.CognitoUserAttribute({
+          new AWSCognito.CognitoIdentityServiceProvider.CognitoUserAttribute({ 
             Name : 'given_name', Value : firstName
           }),
-          new AWSCognito.CognitoIdentityServiceProvider.CognitoUserAttribute({
+          new AWSCognito.CognitoIdentityServiceProvider.CognitoUserAttribute({ 
             Name : 'family_name', Value : lastName
           }),
         ];
@@ -277,7 +278,7 @@
         xhr.setRequestHeader("Content-Type", "application/json");
         xhr.setRequestHeader("Authorization", idToken);
         xhr.send(JSON.stringify({ theme }));
-
+        
         xhr.onreadystatechange = function (e) {
           if (xhr.readyState === 4 && xhr.status === 200) {
             var restaurants = JSON.parse(xhr.responseText);
@@ -287,7 +288,7 @@
             for (var restaurant of restaurants) {
               restaurantsList.append(`
               <li class="restaurant">
-                <ul class="column-container">
+                <ul class="column-container" onclick='placeOrder("${restaurant.name}")'>
                     <li class="item restaurant-name">${restaurant.name}</li>
                     <li class="item restaurant-image">
                       <img src="${restaurant.image}">
@@ -297,6 +298,22 @@
               `);
             }
 
+          } else if (xhr.readyState === 4) {
+            alert(xhr.responseText);
+          }
+        };
+      }
+
+      function placeOrder(restaurantName) {
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', PLACE_ORDER_URL, true);
+        xhr.setRequestHeader("Content-Type", "application/json");
+        xhr.setRequestHeader("Authorization", idToken);
+        xhr.send(JSON.stringify({ restaurantName }));
+
+        xhr.onreadystatechange = function (e) {
+          if (xhr.readyState === 4 && xhr.status === 200) {
+            alert("your order has been placed, we'll let you know once it's been accepted by the restaurant!");
           } else if (xhr.readyState === 4) {
             alert(xhr.responseText);
           }
@@ -322,7 +339,7 @@
           event.preventDefault();
           addUser();
         });
-
+        
         $("#register").on("click", function() {
           regDialog.dialog("open");
         });
@@ -399,7 +416,7 @@
           <img id="logo" src="https://d2qt42rcwzspd6.cloudfront.net/manning/big-mouth.png">
         </li>
         <li class="item">
-          <input id="theme" type="text" size="50" placeholder="enter a theme, eg. cartoon"/>
+          <input id="theme" type="text" size="50" placeholder="enter a theme, eg. rick and morty"/>
           <button onclick="searchRestaurants()">Find Restaurants</button>
         </li>
         <li>
@@ -408,7 +425,7 @@
             <ul id="restaurantsUl" class="row-container">
               {{#restaurants}}
               <li class="restaurant">
-                <ul class="column-container">
+                <ul class="column-container" onclick='placeOrder("{{name}}")'>
                     <li class="item restaurant-name">{{name}}</li>
                     <li class="item restaurant-image">
                       <img src="{{image}}">
@@ -422,7 +439,7 @@
       </ul>
     </div>
 
-    <div id="reg-dialog-form" title="Register">
+    <div id="reg-dialog-form" title="Register">       
       <form>
         <fieldset>
           <label for="first-name">First Name</label>
@@ -457,7 +474,7 @@
 
     <div id="sign-in-form" title="Sign in">
       <form>
-          <fieldset>
+          <fieldset>            
             <label for="sign-in-username">Username</label>
             <input type="text" id="sign-in-username" class="text ui-widget-content ui-corner-all">
             <label for="sign-in-password">Password</label>
