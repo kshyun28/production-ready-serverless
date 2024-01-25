@@ -33,6 +33,9 @@ jobs:
       - name: npm ci
         run: npm ci
 
+      - name: set env variables
+        run: npm run dotEnv
+
       - name: run integration test
         run: npm run test
 
