@@ -12,6 +12,9 @@ custom:
       - CognitoUserPoolServerClientId
     output:
       file: ./.env.cfnoutputs
+  apiGatewayThrottling:
+    maxRequestsPerSecond: 100
+    maxConcurrentRequests: 50
 
 provider:
   name: aws
@@ -33,6 +36,9 @@ functions:
       - http:
           path: /
           method: get
+          throttling:
+            maxRequestsPerSecond: 200
+            maxConcurrentRequests: 100
     environment:
       restaurants_api: !Sub https://${ApiGatewayRestApi}.execute-api.${AWS::Region}.amazonaws.com/${sls:stage}/restaurants
       orders_api: !Sub https://${ApiGatewayRestApi}.execute-api.${AWS::Region}.amazonaws.com/${sls:stage}/orders
@@ -413,3 +419,4 @@ plugins:
   - serverless-export-outputs
   - serverless-plugin-extrinsic-functions
   - serverless-iam-roles-per-function
+  - serverless-api-gateway-throttling
