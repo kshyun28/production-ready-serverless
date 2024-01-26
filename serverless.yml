@@ -217,12 +217,7 @@ resources:
       Properties:
         Type: String
         Name: /${self:service}/${sls:stage}/serviceUrl
-        Value:
-          Fn::Join:
-            - ""
-            - - https://
-              - !Ref ApiGatewayRestApi
-              - .execute-api.${aws:region}.amazonaws.com/${sls:stage}
+        Value: !Sub https://${ApiGatewayRestApi}.execute-api.${AWS::Region}.amazonaws.com/${sls:stage}
 
     EventBus:
       Type: AWS::Events::EventBus
