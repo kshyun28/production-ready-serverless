@@ -17,6 +17,7 @@ provider:
   name: aws
   runtime: nodejs18.x
   region: ap-southeast-1
+  endpointType: regional
   environment:
     rest_api_url: !Sub https://${ApiGatewayRestApi}.execute-api.${AWS::Region}.amazonaws.com/${sls:stage}
     serviceName: ${self:service}
@@ -145,6 +146,27 @@ resources:
         - dev
 
   Resources:
+    CloudFrontDistribution:
+      Type: AWS::CloudFront::Distribution
+      Properties:
+        DistributionConfig:
+          Origins:
+            - DomainName: !Sub ${ApiGatewayRestApi}.execute-api.${AWS::Region}.amazonaws.com
+              OriginPath: /${sls:stage}
+              Id: BigMouthOrigin
+              CustomOriginConfig:
+                HTTPPort: 80
+                HTTPSPort: 443
+                OriginProtocolPolicy: https-only
+                OriginSSLProtocols:
+                  - TLSv1.2
+          Enabled: true
+          DefaultCacheBehavior:
+            TargetOriginId: BigMouthOrigin
+            ViewerProtocolPolicy: redirect-to-https
+            CachePolicyId: b2884449-e4de-46a7-ac36-70bc7f1ddd6d # Managed-CachingOptimizedForUncompressedObjects
+            OriginRequestPolicyId: 59781a5b-3903-41f3-afcb-af62929ccde1 # Managed-CORS-CustomOrigin
+
     RestaurantsTable:
       Type: AWS::DynamoDB::Table
       Properties:
