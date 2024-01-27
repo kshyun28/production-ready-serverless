@@ -48,12 +48,12 @@ jobs:
       # this runs the integration test against the 'dev-ci' stage
       # using the .env file that was captured earlier
       - name: run integration test
-        run: npx cross-env TEST_MODE=handler jest --runInBand
+        run: npx cross-env TEST_MODE=handler jest
 
       # this runs the end-to-end test against the 'dev-ci' stage
       # using the .env file that was captured earlier
       - name: run end-to-end tests
-        run: npx cross-env TEST_MODE=http jest --runInBand
+        run: npx cross-env TEST_MODE=http jest
 
       # delete the 'dev-ci' stage
       - name: destroy temp environment
