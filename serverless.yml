@@ -28,6 +28,8 @@ provider:
     middy_cache_enabled: true
     middy_cache_expiry_milliseconds: 60000 # 1 mins
     ssmStage: ${param:ssmStage, sls:stage}
+  apiGateway:
+    metrics: true
 
 functions:
   get-index:
