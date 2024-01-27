@@ -35,11 +35,11 @@ jobs:
 
       # this provisions a temporary stage called 'dev-ci'
       - name: deploy temp environment
-        run: npx sls deploy -s dev-ci
+        run: npx sls deploy -s dev-ci --param="ssmStage=dev"
 
       # this generates the .env file for the 'dev-ci' stage
       - name: export env
-        run: npx sls export-env --all -s dev-ci
+        run: npx sls export-env --all -s dev-ci --param="ssmStage=dev"
 
       # apply seed data to dev-ci stage
       - name: add seed data
@@ -57,7 +57,7 @@ jobs:
 
       # delete the 'dev-ci' stage
       - name: destroy temp environment
-        run: npx sls remove -s dev-ci
+        run: npx sls remove -s dev-ci --param="ssmStage=dev"
 
       # deploy to the ACTUAL dev stage
       - name: deploy to dev
