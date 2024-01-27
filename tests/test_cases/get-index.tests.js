@@ -1,9 +1,17 @@
 const cheerio = require('cheerio')
 const when = require('../steps/when')
 const { init } = require('../steps/init')
+const { seed_restaurants, delete_restaurants } = require('../steps/seed-restaurants')
 
 describe(`When we invoke the GET / endpoint`, () => {
-  beforeAll(async () => await init())
+  beforeAll(async () => {
+    await init()
+    await seed_restaurants(8)
+  })
+
+  afterAll(async () => {
+    await delete_restaurants()
+  })
 
   it(`Should return the index page with 8 restaurants`, async () => {
     const res = await when.we_invoke_get_index()

@@ -5,8 +5,8 @@
   "main": "index.js",
   "scripts": {
     "dotEnv": "sls export-env --all",
-    "test": "cross-env TEST_MODE=handler jest",
-    "test:e2e": "cross-env TEST_MODE=http jest",
+    "test": "cross-env TEST_MODE=handler jest --runInBand",
+    "test:e2e": "cross-env TEST_MODE=http jest --runInBand",
     "test:load": "artillery run load-test.yml --dotenv .env"
   },
   "keywords": [],
