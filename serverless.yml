@@ -79,6 +79,9 @@ functions:
             name: CognitoAuthorizer
             type: COGNITO_USER_POOLS
             arn: !GetAtt CognitoUserPool.Arn
+          request:
+            schemas:
+              application/json: ${file(schemas/search-restaurants-request.json)}
     environment:
       restaurants_table: !Ref RestaurantsTable
     iamRoleStatements:
@@ -103,6 +106,9 @@ functions:
             name: CognitoAuthorizer
             type: COGNITO_USER_POOLS
             arn: !GetAtt CognitoUserPool.Arn
+          request:
+            schemas:
+              application/json: ${file(schemas/place-order-request.json)}
     environment:
       bus_name: !Ref EventBus
     iamRoleStatements:
