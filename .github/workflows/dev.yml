@@ -33,14 +33,32 @@ jobs:
       - name: npm ci
         run: npm ci
 
-      - name: set env variables
-        run: npm run dotEnv
+      # this provisions a temporary stage called 'dev-ci'
+      - name: deploy temp environment
+        run: npx sls deploy -s dev-ci
 
+      # this generates the .env file for the 'dev-ci' stage
+      - name: export env
+        run: npx sls export-env --all -s dev-ci
+
+      # apply seed data to dev-ci stage
+      - name: add seed data
+        run: node seed-restaurants.js
+
+      # this runs the integration test against the 'dev-ci' stage
+      # using the .env file that was captured earlier
       - name: run integration test
-        run: npm run test
+        run: npx cross-env TEST_MODE=handler jest --runInBand
 
+      # this runs the end-to-end test against the 'dev-ci' stage
+      # using the .env file that was captured earlier
+      - name: run end-to-end tests
+        run: npx cross-env TEST_MODE=http jest --runInBand
+
+      # delete the 'dev-ci' stage
+      - name: destroy temp environment
+        run: npx sls remove -s dev-ci
+
+      # deploy to the ACTUAL dev stage
       - name: deploy to dev
         run: npx sls deploy
-
-      - name: run end-to-end tests
-        run: npm run test:e2e
