@@ -81,7 +81,7 @@ functions:
             arn: !GetAtt CognitoUserPool.Arn
           request:
             schemas:
-              application/json: ${file(schemas/search-restaurants-request.json)}
+              application/json: ${file(schemas/search-restaurants-request.schema.json)}
     environment:
       restaurants_table: !Ref RestaurantsTable
     iamRoleStatements:
@@ -108,7 +108,7 @@ functions:
             arn: !GetAtt CognitoUserPool.Arn
           request:
             schemas:
-              application/json: ${file(schemas/place-order-request.json)}
+              application/json: ${file(schemas/place-order-request.schema.json)}
     environment:
       bus_name: !Ref EventBus
     iamRoleStatements:
