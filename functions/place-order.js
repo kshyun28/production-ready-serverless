@@ -2,6 +2,10 @@ const { EventBridgeClient, PutEventsCommand } = require('@aws-sdk/client-eventbr
 const eventBridge = new EventBridgeClient()
 const chance = require('chance').Chance()
 const { Metrics, MetricUnits } = require('@aws-lambda-powertools/metrics');
+const middy = require('@middy/core')
+const validator = require('@middy/validator')
+const { transpileSchema } = require('@middy/validator/transpile')
+const responseSchema = require('../schemas/response.schema.json')
 
 const metrics = new Metrics({
   namespace: 'big-mouth',
@@ -11,7 +15,7 @@ const metrics = new Metrics({
 
 const busName = process.env.bus_name
 
-module.exports.handler = async (event) => {
+module.exports.handler = middy(async (event) => {
   const restaurantName = JSON.parse(event.body).restaurantName
 
   const orderId = chance.guid()
@@ -41,4 +45,6 @@ module.exports.handler = async (event) => {
   }
 
   return response
-}
+}).use(validator({
+  responseSchema: transpileSchema(responseSchema)
+}))

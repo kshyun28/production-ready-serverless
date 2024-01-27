@@ -2,6 +2,9 @@ const { DynamoDB } = require("@aws-sdk/client-dynamodb")
 const { DynamoDBDocumentClient, ScanCommand } = require("@aws-sdk/lib-dynamodb")
 const middy = require('@middy/core')
 const ssm = require('@middy/ssm')
+const validator = require('@middy/validator')
+const { transpileSchema } = require('@middy/validator/transpile')
+const responseSchema = require('../schemas/response.schema.json')
 
 const dynamodbClient = new DynamoDB()
 const dynamodb = DynamoDBDocumentClient.from(dynamodbClient)
@@ -37,4 +40,6 @@ module.exports.handler = middy(async (event, context) => {
   fetchData: {
     config: `/${serviceName}/${ssmStage}/get-restaurants/config`
   }
+})).use(validator({
+  responseSchema: transpileSchema(responseSchema)
 }))
