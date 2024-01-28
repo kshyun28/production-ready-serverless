@@ -35,6 +35,32 @@ const seed_restaurants = async (numberOfRestaurants) => {
     .catch(err => console.error(err))
 }
 
+const seed_restaurants_with_theme = async (numberOfRestaurants, theme) => {
+  for (let i = 0; i < numberOfRestaurants; i++) {
+    restaurants.push({
+      name: chance.name(),
+      image: chance.url(),
+      themes: [theme]
+    })
+  }
+
+  const putReqs = restaurants.map(x => ({
+    PutRequest: {
+      Item: x
+    }
+  }))
+  console.log(JSON.stringify(putReqs))
+  // Implement batching by 25 items if the number of restaurants exceeds 25.
+  const cmd = new BatchWriteCommand({
+    RequestItems: {
+      [process.env.restaurants_table]: putReqs
+    }
+  })
+  await dynamodb.send(cmd)
+    .then(() => console.log("all done"))
+    .catch(err => console.error(err))
+}
+
 const delete_restaurants = async () => {
   const deleteReqs = restaurants.map(x => ({
     DeleteRequest: {
@@ -57,5 +83,6 @@ const delete_restaurants = async () => {
 
 module.exports = {
   seed_restaurants,
+  seed_restaurants_with_theme,
   delete_restaurants
 }
