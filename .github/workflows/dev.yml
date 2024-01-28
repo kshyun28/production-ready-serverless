@@ -41,10 +41,6 @@ jobs:
       - name: export env
         run: npx sls export-env --all -s dev-ci --param="ssmStage=dev"
 
-      # apply seed data to dev-ci stage
-      - name: add seed data
-        run: node seed-restaurants.js
-
       # this runs the integration test against the 'dev-ci' stage
       # using the .env file that was captured earlier
       - name: run integration test

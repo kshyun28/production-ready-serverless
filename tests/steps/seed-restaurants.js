@@ -49,7 +49,7 @@ const seed_restaurants_with_theme = async (numberOfRestaurants, theme) => {
       Item: x
     }
   }))
-  console.log(JSON.stringify(putReqs))
+
   // Implement batching by 25 items if the number of restaurants exceeds 25.
   const cmd = new BatchWriteCommand({
     RequestItems: {
