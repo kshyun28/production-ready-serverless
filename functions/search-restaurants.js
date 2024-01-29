@@ -19,12 +19,11 @@ const findRestaurantsByTheme = async (theme, count) => {
 
   const resp = await dynamodb.send(new ScanCommand({
     TableName: tableName,
-    Limit: count,
     FilterExpression: "contains(themes, :theme)",
     ExpressionAttributeValues: { ":theme": theme }
   }))
   console.log(`found ${resp.Items.length} restaurants`)
-  return resp.Items
+  return resp.Items.slice(0, count);
 }
 
 module.exports.handler = middy(async (event, context) => {
