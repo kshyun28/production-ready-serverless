@@ -5,6 +5,8 @@ const ssm = require('@middy/ssm')
 const validator = require('@middy/validator')
 const { transpileSchema } = require('@middy/validator/transpile')
 const responseSchema = require('../schemas/response.schema.json')
+const { Logger } = require('@aws-lambda-powertools/logger')
+const logger = new Logger({ serviceName: process.env.serviceName })
 
 const dynamodbClient = new DynamoDB()
 const dynamodb = DynamoDBDocumentClient.from(dynamodbClient)
@@ -15,14 +17,15 @@ const middyCacheEnabled = JSON.parse(process.env.middy_cache_enabled)
 const middyCacheExpiry = parseInt(process.env.middy_cache_expiry_milliseconds)
 
 const findRestaurantsByTheme = async (theme, count) => {
-  console.log(`finding (up to ${count}) restaurants with the theme ${theme}...`)
+  logger.debug('finding restaurants...', { count, theme })
 
   const resp = await dynamodb.send(new ScanCommand({
     TableName: tableName,
     FilterExpression: "contains(themes, :theme)",
     ExpressionAttributeValues: { ":theme": theme }
   }))
-  console.log(`found ${resp.Items.length} restaurants`)
+
+  logger.debug('found restaurants', { count: resp.Items.length })
   return resp.Items.slice(0, count);
 }
 

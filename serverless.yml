@@ -15,6 +15,9 @@ custom:
   apiGatewayThrottling:
     maxRequestsPerSecond: 100
     maxConcurrentRequests: 50
+  logLevel:
+    prod: INFO
+    default: DEBUG
 
 provider:
   name: aws
@@ -28,6 +31,7 @@ provider:
     middy_cache_enabled: true
     middy_cache_expiry_milliseconds: 60000 # 1 mins
     ssmStage: ${param:ssmStage, sls:stage}
+    LOG_LEVEL: ${self:custom.logLevel.${sls:stage}, self:custom.logLevel.default}
   apiGateway:
     metrics: true
 

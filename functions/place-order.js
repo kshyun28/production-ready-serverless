@@ -6,6 +6,8 @@ const middy = require('@middy/core')
 const validator = require('@middy/validator')
 const { transpileSchema } = require('@middy/validator/transpile')
 const responseSchema = require('../schemas/response.schema.json')
+const { Logger } = require('@aws-lambda-powertools/logger')
+const logger = new Logger({ serviceName: process.env.serviceName })
 
 const metrics = new Metrics({
   namespace: 'big-mouth',
@@ -19,7 +21,7 @@ module.exports.handler = middy(async (event) => {
   const restaurantName = JSON.parse(event.body).restaurantName
 
   const orderId = chance.guid()
-  console.log(`placing order ID [${orderId}] to [${restaurantName}]`)
+  logger.debug('placing order...', { orderId, restaurantName })
 
   const putEvent = new PutEventsCommand({
     Entries: [{
@@ -37,7 +39,10 @@ module.exports.handler = middy(async (event) => {
   metrics.addMetric('orderPlaced', MetricUnits.Count, 1);
   metrics.publishStoredMetrics();
 
-  console.log(`published 'order_placed' event into EventBridge`)
+  logger.debug(`published event into EventBridge`, {
+    eventType: 'order_placed',
+    busName
+  })
 
   const response = {
     statusCode: 200,
