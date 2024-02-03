@@ -6,8 +6,12 @@ const middy = require('@middy/core')
 const validator = require('@middy/validator')
 const { transpileSchema } = require('@middy/validator/transpile')
 const responseSchema = require('../schemas/response.schema.json')
-const { Logger } = require('@aws-lambda-powertools/logger')
+const { Logger, injectLambdaContext } = require('@aws-lambda-powertools/logger')
+const { Tracer, captureLambdaHandler } = require('@aws-lambda-powertools/tracer')
+
 const logger = new Logger({ serviceName: process.env.serviceName })
+const tracer = new Tracer({ serviceName: process.env.serviceName })
+tracer.captureAWSv3Client(eventBridge)
 
 const metrics = new Metrics({
   namespace: 'big-mouth',
@@ -18,6 +22,8 @@ const metrics = new Metrics({
 const busName = process.env.bus_name
 
 module.exports.handler = middy(async (event) => {
+  logger.refreshSampleRateCalculation()
+
   const restaurantName = JSON.parse(event.body).restaurantName
 
   const orderId = chance.guid()
@@ -52,4 +58,5 @@ module.exports.handler = middy(async (event) => {
   return response
 }).use(validator({
   responseSchema: transpileSchema(responseSchema)
-}))
+})).use(injectLambdaContext(logger))
+  .use(captureLambdaHandler(tracer))

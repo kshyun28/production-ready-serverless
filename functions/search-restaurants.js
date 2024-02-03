@@ -5,11 +5,13 @@ const ssm = require('@middy/ssm')
 const validator = require('@middy/validator')
 const { transpileSchema } = require('@middy/validator/transpile')
 const responseSchema = require('../schemas/response.schema.json')
-const { Logger } = require('@aws-lambda-powertools/logger')
-const logger = new Logger({ serviceName: process.env.serviceName })
-
+const { Logger, injectLambdaContext } = require('@aws-lambda-powertools/logger')
+const { Tracer, captureLambdaHandler } = require('@aws-lambda-powertools/tracer')
 const dynamodbClient = new DynamoDB()
 const dynamodb = DynamoDBDocumentClient.from(dynamodbClient)
+const logger = new Logger({ serviceName: process.env.serviceName })
+const tracer = new Tracer({ serviceName: process.env.serviceName })
+tracer.captureAWSv3Client(dynamodb)
 
 const { serviceName, ssmStage } = process.env
 const tableName = process.env.restaurants_table
@@ -17,6 +19,7 @@ const middyCacheEnabled = JSON.parse(process.env.middy_cache_enabled)
 const middyCacheExpiry = parseInt(process.env.middy_cache_expiry_milliseconds)
 
 const findRestaurantsByTheme = async (theme, count) => {
+  logger.refreshSampleRateCalculation()
   logger.debug('finding restaurants...', { count, theme })
 
   const resp = await dynamodb.send(new ScanCommand({
@@ -49,4 +52,5 @@ module.exports.handler = middy(async (event, context) => {
   }
 })).use(validator({
   responseSchema: transpileSchema(responseSchema)
-}))
+})).use(injectLambdaContext(logger))
+  .use(captureLambdaHandler(tracer))

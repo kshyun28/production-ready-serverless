@@ -4,8 +4,15 @@ const { SNSClient, PublishCommand } = require('@aws-sdk/client-sns')
 const sns = new SNSClient()
 const { makeIdempotent } = require('@aws-lambda-powertools/idempotency')
 const { DynamoDBPersistenceLayer } = require('@aws-lambda-powertools/idempotency/dynamodb')
-const { Logger } = require('@aws-lambda-powertools/logger')
+const middy = require('@middy/core')
+const { Logger, injectLambdaContext } = require('@aws-lambda-powertools/logger')
+const { Tracer, captureLambdaHandler } = require('@aws-lambda-powertools/tracer')
+
 const logger = new Logger({ serviceName: process.env.serviceName })
+const tracer = new Tracer({ serviceName: process.env.serviceName })
+tracer.captureAWSv3Client(eventBridge)
+tracer.captureAWSv3Client(sns)
+
 
 const busName = process.env.bus_name
 const topicArn = process.env.restaurant_notification_topic
@@ -14,7 +21,9 @@ const persistenceStore = new DynamoDBPersistenceLayer({
   tableName: process.env.idempotency_table
 })
 
-const handler = async (event) => {
+const handler = middy(async (event) => {
+  logger.refreshSampleRateCalculation()
+
   const order = event.detail
   const publishCmd = new PublishCommand({
     Message: JSON.stringify(order),
@@ -40,6 +49,7 @@ const handler = async (event) => {
   logger.debug(`published event to EventBridge`, { event: 'restaurant_notified' })
 
   return orderId
-}
+}).use(injectLambdaContext(logger))
+  .use(captureLambdaHandler(tracer))
 
 module.exports.handler = makeIdempotent(handler, { persistenceStore })

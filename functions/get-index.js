@@ -3,8 +3,12 @@ const Mustache = require('mustache')
 const http = require('axios')
 const aws4 = require('aws4')
 const URL = require('url')
-const { Logger } = require('@aws-lambda-powertools/logger')
+const middy = require('@middy/core')
+const { Logger, injectLambdaContext } = require('@aws-lambda-powertools/logger')
+const { Tracer, captureLambdaHandler } = require('@aws-lambda-powertools/tracer')
+
 const logger = new Logger({ serviceName: process.env.serviceName })
+const tracer = new Tracer({ serviceName: process.env.serviceName })
 
 const restaurantsApiRoot = process.env.restaurants_api
 const ordersApiRoot = process.env.orders_api
@@ -29,10 +33,15 @@ const getRestaurants = async () => {
   const httpReq = http.get(restaurantsApiRoot, {
     headers: opts.headers
   })
-  return (await httpReq).data
+  const data = (await httpReq).data
+  tracer.addResponseAsMetadata(data, 'GET /restaurants')
+
+  return data
 }
 
-module.exports.handler = async (event, context) => {
+module.exports.handler = middy(async (event, context) => {
+  logger.refreshSampleRateCalculation()
+
   const restaurants = await getRestaurants()
   logger.debug('got restaurants', { count: restaurants.length })
   const dayOfWeek = days[new Date().getDay()]
@@ -55,4 +64,5 @@ module.exports.handler = async (event, context) => {
   }
 
   return response
-}
+}).use(injectLambdaContext(logger))
+  .use(captureLambdaHandler(tracer))
