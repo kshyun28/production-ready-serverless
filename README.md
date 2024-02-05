@@ -16,6 +16,10 @@ This serverless application uses JavaScript, Node.js, and [Serverless Framework]
 4. Run integration tests: `npm run test`
 5. Run end-to-end tests: `npm run test:e2e`
 
+## Removing the application
+
+To remove the serverless application, run `npx sls remove`
+
 ## Load tests
 
 For load testing, the application uses [artillery](https://www.artillery.io/).
