@@ -1,6 +1,6 @@
 # production-ready-serverless
 
-An exercise for the [Production-Ready Serverless Workshop (Jan 2024)](https://productionreadyserverless.com/) by [Yan Cui (theburningmonk)](https://theburningmonk.com/).
+An exercise for the [Production-Ready Serverless Workshop (Jan 2024)](https://productionreadyserverless.com/?affiliateId=cd3bb326-fb0d-4789-af27-6674bb54ab80) by [Yan Cui (theburningmonk)](https://theburningmonk.com/).
 
 This serverless application uses JavaScript, Node.js, and [Serverless Framework](https://www.serverless.com/).
 
